@@ -53,16 +53,17 @@
   .hero img{width:100%; height:100%; object-fit:cover; display:block;}
   .hero::after{
     content:''; position:absolute; inset:0;
-    background:linear-gradient(180deg, rgba(8,14,24,.10) 0%, rgba(8,14,24,.35) 45%, rgba(8,14,24,.92) 100%);
+    background:linear-gradient(180deg, rgba(11,22,38,.04) 0%, rgba(11,22,38,.12) 50%, rgba(11,22,38,.68) 100%);
   }
-  .hero-text{position:absolute; right:20px; left:20px; bottom:18px; z-index:2; color:#f7f5f1;}
+  .hero-text{position:absolute; right:20px; left:20px; bottom:18px; z-index:2; color:#fff; text-shadow:0 2px 10px rgba(8,14,24,.55);}
   .hero-text h1{font-size:23px; font-weight:800; margin:0 0 6px; text-wrap:balance;}
-  .hero-text p{font-size:13.5px; margin:0; color:#d8d2c6;}
+  .hero-text p{font-size:13.5px; margin:0; color:#f0ece2;}
   .hero-coach{
     position:absolute; top:16px; right:16px; z-index:2; text-align:right;
+    text-shadow:0 2px 8px rgba(8,14,24,.55);
   }
   .hero-coach .name{font-size:14px; font-weight:800; color:#fff;}
-  .hero-coach .title{font-size:11.5px; color:#d8d2c6;}
+  .hero-coach .title{font-size:11.5px; color:#f0ece2;}
 
   .progress{display:flex; gap:6px; margin:0 0 20px;}
   .progress .dot{flex:1; height:4px; border-radius:2px; background:var(--border); transition:background .2s;}
@@ -141,17 +142,26 @@
   .kcal-banner .num{font-size:32px; font-weight:800; color:var(--brown);}
   .kcal-banner .lbl{font-size:13px; opacity:.85;}
 
-  .day-card{border:1px solid var(--border); border-radius:8px; padding:14px 16px; margin-bottom:10px; background:var(--card);}
-  .day-card h4{margin:0 0 8px; font-size:14.5px; font-weight:800; color:var(--navy);}
-  .day-card ul{margin:0; padding-inline-start:18px;}
-  .day-card li{font-size:14px; margin-bottom:6px;}
-  .day-card li .meta{color:var(--muted); font-size:12.5px;}
+  .day-card{border:1px solid var(--border); border-radius:8px; padding:16px; margin-bottom:10px; background:var(--card);}
+  .day-card h4{margin:0; font-size:14.5px; font-weight:800; color:var(--navy); display:flex; align-items:center; gap:8px;}
+  .day-card h4::before{content:''; width:6px; height:6px; border-radius:50%; background:var(--navy); flex:0 0 auto;}
 
-  .focus-card{border:1.5px solid var(--brown); background:#fbf7f1; border-radius:8px; padding:14px 16px; margin-bottom:10px;}
-  .focus-card h4{margin:0 0 8px; font-size:14.5px; font-weight:800; color:var(--brown-dark);}
-  .focus-card ul{margin:0; padding-inline-start:18px;}
-  .focus-card li{font-size:14px; margin-bottom:6px;}
-  .focus-card li .meta{color:var(--muted); font-size:12.5px;}
+  .focus-card{border:1.5px solid var(--brown); background:#fbf7f1; border-radius:8px; padding:16px; margin-bottom:10px;}
+  .focus-card h4{margin:0; font-size:14.5px; font-weight:800; color:var(--brown-dark); display:flex; align-items:center; gap:8px;}
+  .focus-card h4::before{content:''; width:6px; height:6px; border-radius:50%; background:var(--brown); flex:0 0 auto;}
+
+  .ex-list{display:flex; flex-direction:column;}
+  .ex-row{display:flex; flex-direction:column; gap:6px; padding:10px 0; border-top:1px solid var(--border);}
+  .ex-row:first-child{border-top:none; padding-top:10px;}
+  .ex-name{font-size:14px; font-weight:700; color:var(--ink);}
+  .ex-meta{display:flex; flex-wrap:wrap; gap:6px;}
+  .ex-chip{
+    font-size:11.5px; color:var(--muted); background:rgba(11,22,38,.04);
+    border:1px solid var(--border); border-radius:6px; padding:3px 9px;
+    font-variant-numeric:tabular-nums;
+  }
+  .ex-chip b{color:var(--ink); font-weight:700;}
+  .focus-card .ex-chip{background:rgba(176,146,110,.12);}
 
   .note{background:#fbf7f1; border:1px solid var(--border); border-radius:8px; padding:12px 14px; font-size:13px; color:#5c4a34; margin-bottom:14px;}
   .disclaimer{font-size:12px; color:var(--muted); border-top:1px dashed var(--border); padding-top:12px; margin-top:16px;}
@@ -565,7 +575,7 @@
       chest: ['לחיצת חזה במוט', 'לחיצת חזה בשיפוע עם משקולות', 'פרפר בכבלים'],
       back: ['פולי עליון לחזה', 'חתירה בישיבה בכבל', 'חתירה עם מוט'],
       shoulders: ['לחיצת כתפיים במכונה', 'הרחקות צד עם משקולות'],
-      quad: ['סקוואט עם מוט', 'לחיצת רגליים במכונה'],
+      quad: ['לחיצת רגליים במכונה', 'סקוואט גובלט עם משקולת', 'סקוואט בסמית\' מכונה'],
       hamglute: ['דדליפט רומני עם מוט', 'כפיפת ברך שוכב במכונה'],
       lunge: ['לאנג\'ים עם משקולות'],
       calves: ['עליות שוק בעמידה במכונה'],
@@ -702,14 +712,29 @@
       var h4 = document.createElement('h4');
       h4.textContent = day.label;
       card.appendChild(h4);
-      var ul = document.createElement('ul');
+      var list = document.createElement('div');
+      list.className = 'ex-list';
       day.exercises.forEach(function (ex) {
         var sr = reps || getSetsReps(goal, experience, ex.cat);
-        var li = document.createElement('li');
-        li.innerHTML = ex.name + ' <span class="meta">- ' + sr.sets + ' סטים × ' + sr.reps + ' חזרות, מנוחה ' + sr.rest + '</span>';
-        ul.appendChild(li);
+        var row = document.createElement('div');
+        row.className = 'ex-row';
+
+        var name = document.createElement('div');
+        name.className = 'ex-name';
+        name.textContent = ex.name;
+        row.appendChild(name);
+
+        var meta = document.createElement('div');
+        meta.className = 'ex-meta';
+        meta.innerHTML =
+          '<span class="ex-chip"><b>' + sr.sets + '</b> סטים</span>' +
+          '<span class="ex-chip"><b>' + sr.reps + '</b> חזרות</span>' +
+          '<span class="ex-chip">מנוחה ' + sr.rest + '</span>';
+        row.appendChild(meta);
+
+        list.appendChild(row);
       });
-      card.appendChild(ul);
+      card.appendChild(list);
       container.appendChild(card);
     });
   }

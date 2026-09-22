@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מחשבון קלוריות + בניית תוכנית אימונים אישית</title>
+<meta name="description" content="קבלו תוכנית תזונה ואימונים אישית לגברים ולנשים, בהתאמה לגיל, משקל, רמת פעילות ומטרה - בחינם.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --primary:#16a34a;
+    --primary-dark:#15803d;
+    --primary-light:#dcfce7;
+    --accent:#f97316;
+    --bg:#f3f5f7;
+    --card:#ffffff;
+    --text:#1f2937;
+    --muted:#6b7280;
+    --border:#e5e7eb;
+    --danger:#dc2626;
+    --radius:16px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Heebo', Arial, sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    direction:rtl;
+    line-height:1.5;
+  }
+  .app{max-width:640px; margin:0 auto; padding:20px 16px 60px;}
+  header.top{text-align:center; margin-bottom:20px;}
+  header.top .badge{
+    display:inline-block; background:var(--primary-light); color:var(--primary-dark);
+    font-weight:600; font-size:13px; padding:6px 14px; border-radius:999px; margin-bottom:10px;
+  }
+  header.top h1{font-size:22px; margin:0 0 6px; font-weight:800;}
+  header.top p{color:var(--muted); font-size:14px; margin:0;}
+
+  .progress{display:flex; gap:6px; margin:20px 0;}
+  .progress .dot{flex:1; height:6px; border-radius:999px; background:var(--border); transition:background .2s;}
+  .progress .dot.done{background:var(--primary);}
+
+  .card{
+    background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
+    padding:22px 18px; box-shadow:0 1px 3px rgba(0,0,0,.04);
+  }
+  .step{display:none;}
+  .step.active{display:block; animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+
+  .step h2{font-size:18px; margin:0 0 4px;}
+  .step .hint{color:var(--muted); font-size:13px; margin:0 0 18px;}
+
+  .field{margin-bottom:16px;}
+  .field label{display:block; font-size:14px; font-weight:600; margin-bottom:6px;}
+  .field input[type=text], .field input[type=tel], .field input[type=number]{
+    width:100%; padding:12px 14px; border:1.5px solid var(--border); border-radius:10px;
+    font-size:15px; font-family:inherit; background:#fff;
+  }
+  .field input:focus{outline:none; border-color:var(--primary);}
+  .field small.err{color:var(--danger); display:none; font-size:12px; margin-top:4px;}
+  .field.invalid input{border-color:var(--danger);}
+  .field.invalid small.err{display:block;}
+
+  .choice-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  .choice-grid.single-col{grid-template-columns:1fr;}
+  .choice{
+    border:1.5px solid var(--border); border-radius:12px; padding:12px 14px; cursor:pointer;
+    font-size:14px; font-weight:600; text-align:center; user-select:none; background:#fff;
+    transition:all .15s;
+  }
+  .choice .sub{display:block; font-weight:400; color:var(--muted); font-size:12px; margin-top:3px;}
+  .choice:hover{border-color:var(--primary);}
+  .choice.selected{border-color:var(--primary); background:var(--primary-light); color:var(--primary-dark);}
+
+  .nav-row{display:flex; gap:10px; margin-top:22px;}
+  button{
+    font-family:inherit; font-size:15px; font-weight:700; border-radius:12px; border:none;
+    padding:14px 18px; cursor:pointer;
+  }
+  .btn-primary{background:var(--primary); color:#fff; flex:1;}
+  .btn-primary:hover{background:var(--primary-dark);}
+  .btn-primary:disabled{background:#9ca3af; cursor:not-allowed;}
+  .btn-secondary{background:#fff; color:var(--text); border:1.5px solid var(--border); flex:0 0 auto;}
+  .btn-secondary:hover{border-color:var(--muted);}
+
+  .consent{display:flex; align-items:flex-start; gap:8px; font-size:13px; color:var(--muted); margin-top:10px;}
+  .consent input{margin-top:3px;}
+
+  .hp-field{position:absolute; left:-9999px; opacity:0;}
+
+  /* results */
+  #results{display:none;}
+  #results.active{display:block;}
+  .result-header{text-align:center; margin-bottom:20px;}
+  .result-header h1{font-size:22px; margin:0 0 6px;}
+  .result-header p{color:var(--muted); font-size:14px; margin:0;}
+
+  .section{margin-bottom:18px;}
+  .section h3{font-size:16px; margin:0 0 12px; display:flex; align-items:center; gap:8px;}
+
+  .macro-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:14px;}
+  .macro-tile{background:var(--primary-light); border-radius:12px; padding:14px 8px; text-align:center;}
+  .macro-tile .val{font-size:18px; font-weight:800; color:var(--primary-dark);}
+  .macro-tile .lbl{font-size:12px; color:var(--muted); margin-top:2px;}
+  .kcal-banner{
+    background:linear-gradient(135deg, var(--primary), var(--primary-dark)); color:#fff;
+    border-radius:14px; padding:18px; text-align:center; margin-bottom:14px;
+  }
+  .kcal-banner .num{font-size:32px; font-weight:800;}
+  .kcal-banner .lbl{font-size:13px; opacity:.9;}
+
+  .day-card{border:1px solid var(--border); border-radius:12px; padding:14px 16px; margin-bottom:10px;}
+  .day-card h4{margin:0 0 8px; font-size:15px; color:var(--primary-dark);}
+  .day-card ul{margin:0; padding-inline-start:18px;}
+  .day-card li{font-size:14px; margin-bottom:6px;}
+  .day-card li .meta{color:var(--muted); font-size:12.5px;}
+
+  .note{background:#fff7ed; border:1px solid #fed7aa; border-radius:12px; padding:12px 14px; font-size:13px; color:#9a3412; margin-bottom:14px;}
+  .disclaimer{font-size:12px; color:var(--muted); border-top:1px dashed var(--border); padding-top:12px; margin-top:16px;}
+
+  .submit-status{font-size:13px; text-align:center; margin-top:10px; color:var(--muted); min-height:18px;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="top">
+    <span class="badge">כלי חינמי</span>
+    <h1>מחשבון קלוריות + תוכנית אימונים אישית</h1>
+    <p>לגברים ולנשים · מותאם אישית לפי הפרמטרים שלך · לוקח פחות מדקה</p>
+  </header>
+
+  <div class="progress" id="progressBar"></div>
+
+  <div class="card">
+    <form id="wizardForm" novalidate>
+
+      <!-- honeypot - anti-spam, must stay empty -->
+      <div class="hp-field" aria-hidden="true">
+        <label for="website">Website</label>
+        <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+      </div>
+
+      <!-- Step 0: gender + goal -->
+      <section class="step active" data-step="0">
+        <h2>קצת עליך</h2>
+        <p class="hint">כדי לחשב נכון את הקלוריות והתוכנית</p>
+
+        <div class="field">
+          <label>מין</label>
+          <div class="choice-grid" data-group="gender">
+            <div class="choice" data-value="male">גבר</div>
+            <div class="choice" data-value="female">אישה</div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>מה המטרה שלך?</label>
+          <div class="choice-grid single-col" data-group="goal">
+            <div class="choice" data-value="fatloss">ירידה במשקל / הורדת אחוזי שומן</div>
+            <div class="choice" data-value="gain">עלייה במסת שריר</div>
+            <div class="choice" data-value="maintain">שימור המשקל הנוכחי והתחזקות</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Step 1: personal stats -->
+      <section class="step" data-step="1">
+        <h2>נתונים אישיים</h2>
+        <p class="hint">הנתונים משמשים אך ורק לחישוב האישי שלך</p>
+
+        <div class="field" data-field="age">
+          <label>גיל</label>
+          <input type="number" inputmode="numeric" min="14" max="80" placeholder="לדוגמה: 32">
+          <small class="err">הזן/י גיל בין 14 ל-80</small>
+        </div>
+        <div class="field" data-field="height">
+          <label>גובה (ס"מ)</label>
+          <input type="number" inputmode="numeric" min="120" max="230" placeholder="לדוגמה: 175">
+          <small class="err">הזן/י גובה בין 120 ל-230 ס"מ</small>
+        </div>
+        <div class="field" data-field="weight">
+          <label>משקל (ק"ג)</label>
+          <input type="number" inputmode="numeric" min="35" max="250" placeholder="לדוגמה: 82">
+          <small class="err">הזן/י משקל בין 35 ל-250 ק"ג</small>
+        </div>
+      </section>
+
+      <!-- Step 2: activity level -->
+      <section class="step" data-step="2">
+        <h2>רמת הפעילות היומית שלך</h2>
+        <p class="hint">חוץ מהאימונים עצמם - כמה את/ה זז/ה ביום-יום</p>
+
+        <div class="field">
+          <div class="choice-grid single-col" data-group="activity">
+            <div class="choice" data-value="1.2">כמעט ללא פעילות<span class="sub">עבודה יושבת, מעט מאוד הליכה</span></div>
+            <div class="choice" data-value="1.375">פעילות קלה<span class="sub">1-3 אימונים בשבוע</span></div>
+            <div class="choice" data-value="1.55">פעילות בינונית<span class="sub">3-5 אימונים בשבוע</span></div>
+            <div class="choice" data-value="1.725">פעילות גבוהה<span class="sub">6-7 אימונים בשבוע</span></div>
+            <div class="choice" data-value="1.9">פעילות גבוהה מאוד<span class="sub">אימונים יומיים אינטנסיביים / עבודה פיזית קשה</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Step 3: training preferences -->
+      <section class="step" data-step="3">
+        <h2>העדפות אימון</h2>
+        <p class="hint">כדי לבנות לך תוכנית שימושית באמת</p>
+
+        <div class="field">
+          <label>רמת ניסיון באימונים</label>
+          <div class="choice-grid single-col" data-group="experience">
+            <div class="choice" data-value="beginner">מתחיל/ה<span class="sub">פחות משנה של אימוני כוח סדירים</span></div>
+            <div class="choice" data-value="intermediate">בינוני/ת<span class="sub">בין שנה ל-3 שנים</span></div>
+            <div class="choice" data-value="advanced">מתקדם/ת<span class="sub">3+ שנים של אימונים סדירים</span></div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>כמה ימי אימון בשבוע?</label>
+          <div class="choice-grid" data-group="days">
+            <div class="choice" data-value="2">יומיים</div>
+            <div class="choice" data-value="3">3 ימים</div>
+            <div class="choice" data-value="4">4 ימים</div>
+            <div class="choice" data-value="5">5 ימים</div>
+            <div class="choice" data-value="6">6 ימים</div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>איפה מתאמנים?</label>
+          <div class="choice-grid single-col" data-group="equipment">
+            <div class="choice" data-value="gym">חדר כושר מאובזר</div>
+            <div class="choice" data-value="home">בבית - עם משקולות / גומיות</div>
+            <div class="choice" data-value="bodyweight">בבית - בלי ציוד (משקל גוף בלבד)</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Step 4: contact -->
+      <section class="step" data-step="4">
+        <h2>איפה לשלוח את התוכנית?</h2>
+        <p class="hint">התוכנית האישית שלך תוצג כאן מיד, ונשמח גם לשלוח אותה אליך לוואטסאפ</p>
+
+        <div class="field" data-field="name">
+          <label>שם מלא</label>
+          <input type="text" autocomplete="name" placeholder="לדוגמה: ישראל ישראלי">
+          <small class="err">הזן/י שם מלא</small>
+        </div>
+        <div class="field" data-field="phone">
+          <label>מספר טלפון (וואטסאפ)</label>
+          <input type="tel" inputmode="tel" autocomplete="tel" placeholder="לדוגמה: 0501234567">
+          <small class="err">הזן/י מספר טלפון תקין</small>
+        </div>
+
+        <label class="consent">
+          <input type="checkbox" id="consentCheck">
+          <span>אני מאשר/ת קבלת הודעה עם התוכנית ומידע נוסף בנושא כושר ותזונה לוואטסאפ. ניתן להסיר בקשה בכל שלב.</span>
+        </label>
+      </section>
+
+      <div class="nav-row">
+        <button type="button" class="btn-secondary" id="backBtn">חזרה</button>
+        <button type="button" class="btn-primary" id="nextBtn">המשך</button>
+      </div>
+      <div class="submit-status" id="submitStatus"></div>
+    </form>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="results">
+    <div class="result-header">
+      <h1 id="resultsTitle">התוכנית האישית שלך 💪</h1>
+      <p>מבוססת על הנתונים שהזנת - קלוריות, מאקרו ותוכנית אימונים שבועית</p>
+    </div>
+
+    <div class="section">
+      <div class="kcal-banner">
+        <div class="num" id="kcalValue">--</div>
+        <div class="lbl">קלוריות מומלצות ליום</div>
+      </div>
+      <div class="macro-grid">
+        <div class="macro-tile"><div class="val" id="proteinValue">--</div><div class="lbl">חלבון (גרם)</div></div>
+        <div class="macro-tile"><div class="val" id="carbsValue">--</div><div class="lbl">פחמימה (גרם)</div></div>
+        <div class="macro-tile"><div class="val" id="fatValue">--</div><div class="lbl">שומן (גרם)</div></div>
+      </div>
+      <div class="note" id="cardioNote" style="display:none;"></div>
+    </div>
+
+    <div class="section">
+      <h3>🏋️ תוכנית האימונים השבועית שלך</h3>
+      <div id="workoutDays"></div>
+    </div>
+
+    <div class="section">
+      <div class="disclaimer">
+        הכלי מספק המלצה כללית למטרות אינפורמטיביות בלבד, ואינו תחליף לייעוץ רפואי, תזונתי או אימוני מקצועי.
+        מומלץ להתייעץ עם רופא/ה לפני התחלת תהליך תזונה/אימונים חדש, במיוחד אם קיימת בעיה רפואית.
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button type="button" class="btn-secondary" id="restartBtn">התחלה מחדש</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  // ============================================================
+  // הגדרות - יש לערוך לפני פרסום הדף (ראה README.md בתיקייה הזו)
+  // ============================================================
+  var CONFIG = {
+    // כתובת ה-Web App של Apps Script אחרי פריסה (ראה README.md). השאר ריק כדי
+    // לבדוק את הכלי מקומית בלי לשלוח לידים לשום מקום.
+    ENDPOINT_URL: '',
+    // אותו ערך בדיוק כמו ב-Script Property בשם LEAD_FORM_SECRET (ראה README.md).
+    // אפשר להשאיר ריק אם לא הוגדר סוד בצד השרת.
+    SHARED_SECRET: '',
+    COACH_NAME: 'מאיר',
+  };
+
+  // ============================================================
+  // State
+  // ============================================================
+  var STEPS = ['0', '1', '2', '3', '4'];
+  var stepIndex = 0;
+  var answers = {
+    gender: null, goal: null, age: null, height: null, weight: null,
+    activity: null, experience: null, days: null, equipment: null,
+    name: '', phone: ''
+  };
+
+  var form = document.getElementById('wizardForm');
+  var progressBar = document.getElementById('progressBar');
+  var nextBtn = document.getElementById('nextBtn');
+  var backBtn = document.getElementById('backBtn');
+  var submitStatus = document.getElementById('submitStatus');
+
+  // build progress dots
+  STEPS.forEach(function () {
+    var d = document.createElement('div');
+    d.className = 'dot';
+    progressBar.appendChild(d);
+  });
+
+  function updateProgress() {
+    var dots = progressBar.querySelectorAll('.dot');
+    dots.forEach(function (d, i) { d.classList.toggle('done', i <= stepIndex); });
+  }
+
+  function showStep(i) {
+    document.querySelectorAll('.step').forEach(function (s) {
+      s.classList.toggle('active', s.getAttribute('data-step') === STEPS[i]);
+    });
+    backBtn.style.visibility = i === 0 ? 'hidden' : 'visible';
+    nextBtn.textContent = i === STEPS.length - 1 ? 'קבל/י את התוכנית שלי' : 'המשך';
+    updateProgress();
+  }
+
+  // choice buttons (single-select groups)
+  document.querySelectorAll('[data-group]').forEach(function (group) {
+    group.addEventListener('click', function (e) {
+      var choice = e.target.closest('.choice');
+      if (!choice) return;
+      group.querySelectorAll('.choice').forEach(function (c) { c.classList.remove('selected'); });
+      choice.classList.add('selected');
+      answers[group.getAttribute('data-group')] = choice.getAttribute('data-value');
+      clearFieldError(group.closest('.field'));
+    });
+  });
+
+  function fieldEl(name) { return form.querySelector('[data-field="' + name + '"]'); }
+  function markFieldError(el) { if (el) el.classList.add('invalid'); }
+  function clearFieldError(el) { if (el) el.classList.remove('invalid'); }
+
+  function validateStep(i) {
+    var ok = true;
+    if (STEPS[i] === '0') {
+      if (!answers.gender) { ok = false; }
+      if (!answers.goal) { ok = false; }
+    }
+    if (STEPS[i] === '1') {
+      var age = Number(fieldEl('age').querySelector('input').value);
+      var height = Number(fieldEl('height').querySelector('input').value);
+      var weight = Number(fieldEl('weight').querySelector('input').value);
+      if (!(age >= 14 && age <= 80)) { markFieldError(fieldEl('age')); ok = false; } else { clearFieldError(fieldEl('age')); answers.age = age; }
+      if (!(height >= 120 && height <= 230)) { markFieldError(fieldEl('height')); ok = false; } else { clearFieldError(fieldEl('height')); answers.height = height; }
+      if (!(weight >= 35 && weight <= 250)) { markFieldError(fieldEl('weight')); ok = false; } else { clearFieldError(fieldEl('weight')); answers.weight = weight; }
+    }
+    if (STEPS[i] === '2') {
+      if (!answers.activity) { ok = false; }
+    }
+    if (STEPS[i] === '3') {
+      if (!answers.experience || !answers.days || !answers.equipment) { ok = false; }
+    }
+    if (STEPS[i] === '4') {
+      var name = fieldEl('name').querySelector('input').value.trim();
+      var phoneRaw = fieldEl('phone').querySelector('input').value.trim();
+      var digits = phoneRaw.replace(/\D/g, '');
+      if (name.length < 2) { markFieldError(fieldEl('name')); ok = false; } else { clearFieldError(fieldEl('name')); answers.name = name; }
+      if (!(digits.length >= 9 && digits.length <= 12)) { markFieldError(fieldEl('phone')); ok = false; } else { clearFieldError(fieldEl('phone')); answers.phone = digits; }
+    }
+    return ok;
+  }
+
+  nextBtn.addEventListener('click', function () {
+    if (!validateStep(stepIndex)) return;
+    if (stepIndex < STEPS.length - 1) {
+      stepIndex++;
+      showStep(stepIndex);
+    } else {
+      submitAndShowResults();
+    }
+  });
+
+  backBtn.addEventListener('click', function () {
+    if (stepIndex === 0) return;
+    stepIndex--;
+    showStep(stepIndex);
+  });
+
+  document.getElementById('restartBtn').addEventListener('click', function () {
+    location.reload();
+  });
+
+  // ============================================================
+  // חישוב קלוריות ומאקרו
+  // ============================================================
+  function calcNutrition(a) {
+    var bmr = a.gender === 'male'
+      ? (10 * a.weight + 6.25 * a.height - 5 * a.age + 5)
+      : (10 * a.weight + 6.25 * a.height - 5 * a.age - 161);
+
+    var tdee = bmr * Number(a.activity);
+
+    var calories;
+    if (a.goal === 'fatloss') calories = tdee * 0.8;
+    else if (a.goal === 'gain') calories = tdee * 1.12;
+    else calories = tdee;
+
+    var floor = a.gender === 'male' ? 1500 : 1200;
+    if (calories < floor) calories = floor;
+    calories = Math.round(calories / 10) * 10;
+
+    var proteinPerKg = a.goal === 'gain' ? 1.8 : 2.0;
+    var proteinG = Math.round(proteinPerKg * a.weight);
+    var proteinKcal = proteinG * 4;
+
+    var fatG = Math.round((calories * 0.25) / 9);
+    var fatKcal = fatG * 9;
+
+    var carbsKcal = Math.max(calories - proteinKcal - fatKcal, 0);
+    var carbsG = Math.round(carbsKcal / 4);
+
+    return { calories: calories, proteinG: proteinG, carbsG: carbsG, fatG: fatG, bmr: Math.round(bmr), tdee: Math.round(tdee) };
+  }
+
+  // ============================================================
+  // בניית תוכנית אימונים
+  // ============================================================
+  var EXERCISES = {
+    gym: {
+      chest: ['לחיצת חזה במוט', 'לחיצת חזה בשיפוע עם משקולות', 'פרפר בכבלים'],
+      back: ['פולי עליון לחזה', 'חתירה בישיבה בכבל', 'חתירה עם מוט'],
+      shoulders: ['לחיצת כתפיים במכונה', 'הרחקות צד עם משקולות'],
+      quad: ['סקוואט עם מוט', 'לחיצת רגליים במכונה'],
+      hamglute: ['דדליפט רומני עם מוט', 'כפיפת ברך שוכב במכונה'],
+      lunge: ['לאנג\'ים עם משקולות'],
+      calves: ['עליות שוק בעמידה במכונה'],
+      arms: ['כפיפת מרפקים במוט', 'פשיטת מרפקים בכבל', 'כפיפת פטיש עם משקולות'],
+      core: ['פלאנק', 'כפיפות בטן עם משקולת', 'הרמות רגליים תלויות']
+    },
+    home: {
+      chest: ['שכיבות סמיכה', 'לחיצת חזה עם משקולות על הרצפה'],
+      back: ['חתירה ביד אחת עם משקולת', 'חתירה כפופה עם משקולות'],
+      shoulders: ['לחיצת כתפיים עם משקולות בישיבה', 'הרחקות צד עם משקולות'],
+      quad: ['סקוואט גובלט עם משקולת', 'סקוואט משקל גוף איטי (טמפו)'],
+      hamglute: ['הרמת אגן חד-רגלית', 'דדליפט רומני עם משקולות'],
+      lunge: ['לאנג\'ים הליכה עם משקולות'],
+      calves: ['עליות שוק בעמידה עם משקולות'],
+      arms: ['כפיפת מרפקים עם משקולות', 'פשיטת מרפקים מעל הראש עם משקולת'],
+      core: ['פלאנק', 'כפיפות בטן', 'מאונטיין קליימברס']
+    },
+    bodyweight: {
+      chest: ['שכיבות סמיכה רגילות', 'שכיבות סמיכה מוגבהות רגליים'],
+      back: ['סופרמן', 'שחיית יבשה (Y-T-W)'],
+      shoulders: ['פייק פוש אפ'],
+      quad: ['סקוואט משקל גוף', 'קפיצות סקוואט'],
+      hamglute: ['גשר אגן (Glute Bridge)', 'הרמת אגן חד-רגלית'],
+      lunge: ['לאנג\'ים הליכה'],
+      calves: ['עליות שוק בעמידה'],
+      arms: ['שכיבות סמיכה צרות (טריצפס)', 'שכיבות סמיכה רחבות (חזה וכתפיים)'],
+      core: ['פלאנק', 'כפיפות בטן', 'מאונטיין קליימברס']
+    }
+  };
+
+  function pick(equipment, cat, idx) {
+    var pool = EXERCISES[equipment][cat] || [];
+    if (pool.length === 0) return null;
+    return pool[idx % pool.length];
+  }
+
+  var TEMPLATES = {
+    fullBodyA: [['quad', 0], ['chest', 0], ['back', 0], ['shoulders', 0], ['core', 0]],
+    fullBodyB: [['hamglute', 0], ['back', 1], ['chest', 1], ['arms', 0], ['core', 1]],
+    fullBodyC: [['lunge', 0], ['shoulders', 1], ['back', 2], ['chest', 2], ['core', 0]],
+    push: [['chest', 0], ['chest', 1], ['shoulders', 0], ['arms', 1], ['core', 0]],
+    pull: [['back', 0], ['back', 1], ['shoulders', 1], ['arms', 0], ['core', 1]],
+    legs: [['quad', 0], ['hamglute', 0], ['lunge', 0], ['calves', 0], ['core', 0]],
+    upper: [['chest', 0], ['back', 0], ['shoulders', 0], ['arms', 0], ['arms', 1]],
+    lower: [['quad', 0], ['hamglute', 0], ['lunge', 0], ['calves', 0], ['core', 0]]
+  };
+
+  function buildDay(equipment, templateKey, variantOffset) {
+    variantOffset = variantOffset || 0;
+    return TEMPLATES[templateKey].map(function (pair) {
+      return { cat: pair[0], name: pick(equipment, pair[0], pair[1] + variantOffset) };
+    }).filter(function (ex) { return ex.name; });
+  }
+
+  var DAY_LABELS = {
+    fullBodyA: 'גוף מלא - אימון A', fullBodyB: 'גוף מלא - אימון B', fullBodyC: 'גוף מלא - אימון C',
+    push: 'דחיפה (חזה, כתפיים, טריצפס)', pull: 'משיכה (גב, ביצפס)', legs: 'רגליים',
+    upper: 'פלג גוף עליון', lower: 'פלג גוף תחתון'
+  };
+
+  function buildWeekPlan(equipment, experience, daysPerWeek) {
+    var days = Number(daysPerWeek);
+    var plan = [];
+    if (days === 2) {
+      plan = [['fullBodyA', 0], ['fullBodyB', 0]];
+    } else if (days === 3) {
+      plan = experience === 'beginner'
+        ? [['fullBodyA', 0], ['fullBodyB', 0], ['fullBodyC', 0]]
+        : [['push', 0], ['pull', 0], ['legs', 0]];
+    } else if (days === 4) {
+      plan = [['upper', 0], ['lower', 0], ['upper', 1], ['lower', 1]];
+    } else if (days === 5) {
+      plan = [['push', 0], ['pull', 0], ['legs', 0], ['upper', 1], ['lower', 1]];
+    } else if (days === 6) {
+      plan = [['push', 0], ['pull', 0], ['legs', 0], ['push', 1], ['pull', 1], ['legs', 1]];
+    }
+    return plan.map(function (pair, idx) {
+      return {
+        label: DAY_LABELS[pair[0]] + (plan.filter(function (p) { return p[0] === pair[0]; }).length > 1 ? ' (' + (idx + 1) + ')' : ''),
+        exercises: buildDay(equipment, pair[0], pair[1])
+      };
+    });
+  }
+
+  function getSetsReps(goal, experience, cat) {
+    if (cat === 'core') return { sets: 3, reps: '30-45 שניות / עד תשישות', rest: '30 שנ׳' };
+    if (goal === 'fatloss') return { sets: experience === 'advanced' ? 4 : 3, reps: '12-15', rest: '45-60 שנ׳' };
+    if (goal === 'gain') return { sets: experience === 'beginner' ? 3 : (experience === 'advanced' ? 5 : 4), reps: '8-12', rest: '75-90 שנ׳' };
+    return { sets: 3, reps: '10-12', rest: '60 שנ׳' };
+  }
+
+  // ============================================================
+  // רינדור תוצאות
+  // ============================================================
+  function renderResults(a, nutrition, weekPlan) {
+    document.getElementById('resultsTitle').textContent = 'התוכנית האישית של ' + a.name.split(' ')[0] + ' 💪';
+    document.getElementById('kcalValue').textContent = nutrition.calories.toLocaleString('he-IL');
+    document.getElementById('proteinValue').textContent = nutrition.proteinG;
+    document.getElementById('carbsValue').textContent = nutrition.carbsG;
+    document.getElementById('fatValue').textContent = nutrition.fatG;
+
+    var cardioNote = document.getElementById('cardioNote');
+    if (a.goal === 'fatloss') {
+      cardioNote.style.display = 'block';
+      cardioNote.textContent = 'טיפ: כדי לזרז את קצב הירידה במשקל, מומלץ להוסיף 2-3 פעמים בשבוע קרדיו קל-בינוני (הליכה מהירה / אופניים) של 20-30 דקות, בנפרד מאימוני הכוח.';
+    } else {
+      cardioNote.style.display = 'none';
+    }
+
+    var wrap = document.getElementById('workoutDays');
+    wrap.innerHTML = '';
+    weekPlan.forEach(function (day) {
+      var card = document.createElement('div');
+      card.className = 'day-card';
+      var h4 = document.createElement('h4');
+      h4.textContent = day.label;
+      card.appendChild(h4);
+      var ul = document.createElement('ul');
+      day.exercises.forEach(function (ex) {
+        var sr = getSetsReps(a.goal, a.experience, ex.cat);
+        var li = document.createElement('li');
+        li.innerHTML = ex.name + ' <span class="meta">- ' + sr.sets + ' סטים × ' + sr.reps + ' חזרות, מנוחה ' + sr.rest + '</span>';
+        ul.appendChild(li);
+      });
+      card.appendChild(ul);
+      wrap.appendChild(card);
+    });
+
+    form.closest('.card').style.display = 'none';
+    progressBar.style.display = 'none';
+    document.getElementById('results').classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // ============================================================
+  // שליחת ליד ל-Google Sheet (ברקע, לא חוסם את הצגת התוצאות)
+  // ============================================================
+  function buildLeadSummary(a, nutrition) {
+    var genderLabel = a.gender === 'male' ? 'גבר' : 'אישה';
+    var goalLabel = { fatloss: 'ירידה במשקל', gain: 'עלייה במסת שריר', maintain: 'שימור' }[a.goal];
+    var equipmentLabel = { gym: 'חדר כושר', home: 'בית עם משקולות', bodyweight: 'בית בלי ציוד' }[a.equipment];
+    var experienceLabel = { beginner: 'מתחיל/ה', intermediate: 'בינוני/ת', advanced: 'מתקדם/ת' }[a.experience];
+
+    return [
+      'ליד מהכלי החינמי (מחשבון קלוריות + תוכנית אימונים)',
+      genderLabel + ', גיל ' + a.age + ', ' + a.height + ' ס"מ, ' + a.weight + ' ק"ג',
+      'מטרה: ' + goalLabel,
+      'רמת ניסיון: ' + experienceLabel + ', ' + a.days + ' ימי אימון בשבוע, מיקום: ' + equipmentLabel,
+      'קלוריות מומלצות: ' + nutrition.calories + ' (חלבון ' + nutrition.proteinG + 'ג\', פחמימה ' + nutrition.carbsG + 'ג\', שומן ' + nutrition.fatG + 'ג\')'
+    ].join('\n');
+  }
+
+  function submitLead(a, nutrition) {
+    if (!CONFIG.ENDPOINT_URL) return; // לא הוגדר endpoint - מדלג בשקט (מצב פיתוח מקומי)
+    if (document.getElementById('website').value) return; // honeypot מולא - כנראה בוט, לא שולחים
+
+    var payload = {
+      secret: CONFIG.SHARED_SECRET,
+      name: a.name,
+      phone: a.phone,
+      gender: a.gender === 'female' ? 'women' : 'men',
+      summary: buildLeadSummary(a, nutrition)
+    };
+
+    try {
+      fetch(CONFIG.ENDPOINT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
+      });
+    } catch (err) {
+      // שקט בכוונה - לא רוצים לתקוע את המשתמש בגלל בעיית רשת
+    }
+  }
+
+  function submitAndShowResults() {
+    if (!document.getElementById('consentCheck').checked) {
+      submitStatus.textContent = 'יש לאשר קבלת הודעה בוואטסאפ כדי להמשיך';
+      submitStatus.style.color = 'var(--danger)';
+      return;
+    }
+    submitStatus.textContent = '';
+
+    var nutrition = calcNutrition(answers);
+    var weekPlan = buildWeekPlan(answers.equipment, answers.experience, answers.days);
+
+    submitLead(answers, nutrition);
+    renderResults(answers, nutrition, weekPlan);
+  }
+
+  showStep(0);
+})();
+</script>
+</body>
+</html>

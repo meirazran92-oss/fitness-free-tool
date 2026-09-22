@@ -3,65 +3,89 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>מחשבון קלוריות + בניית תוכנית אימונים אישית</title>
-<meta name="description" content="קבלו תוכנית תזונה ואימונים אישית לגברים ולנשים, בהתאמה לגיל, משקל, רמת פעילות ומטרה - בחינם.">
+<title>מחשבון קלוריות + בניית תוכנית אימונים אישית | מאיר עזרן</title>
+<meta name="description" content="קבלו תוכנית תזונה ואימונים אישית לגברים ולנשים, בהתאמה לגיל, משקל, רמת פעילות, מטרה ואזורי שיפור - בחינם, אצל מאיר עזרן.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
-    --primary:#16a34a;
-    --primary-dark:#15803d;
-    --primary-light:#dcfce7;
-    --accent:#f97316;
-    --bg:#f3f5f7;
+    --navy:#0b1626;
+    --navy-2:#13233a;
+    --brown:#b0926e;
+    --brown-dark:#8a6f52;
+    --paper:#f7f5f1;
     --card:#ffffff;
-    --text:#1f2937;
-    --muted:#6b7280;
-    --border:#e5e7eb;
-    --danger:#dc2626;
-    --radius:16px;
+    --ink:#14181f;
+    --muted:#686f79;
+    --border:#e3ded5;
+    --danger:#b3261e;
+    --radius:10px;
   }
   *{box-sizing:border-box;}
   body{
     margin:0;
     font-family:'Heebo', Arial, sans-serif;
-    background:var(--bg);
-    color:var(--text);
+    background:var(--paper);
+    color:var(--ink);
     direction:rtl;
-    line-height:1.5;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
   }
-  .app{max-width:640px; margin:0 auto; padding:20px 16px 60px;}
-  header.top{text-align:center; margin-bottom:20px;}
-  header.top .badge{
-    display:inline-block; background:var(--primary-light); color:var(--primary-dark);
-    font-weight:600; font-size:13px; padding:6px 14px; border-radius:999px; margin-bottom:10px;
-  }
-  header.top h1{font-size:22px; margin:0 0 6px; font-weight:800;}
-  header.top p{color:var(--muted); font-size:14px; margin:0;}
+  .app{max-width:640px; margin:0 auto; padding:0 16px 56px;}
 
-  .progress{display:flex; gap:6px; margin:20px 0;}
-  .progress .dot{flex:1; height:6px; border-radius:999px; background:var(--border); transition:background .2s;}
-  .progress .dot.done{background:var(--primary);}
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 0; font-size:12px; letter-spacing:.02em; color:var(--muted);
+  }
+  .topbar .badge{
+    display:inline-block; background:var(--navy); color:#fff;
+    font-weight:700; font-size:12px; padding:5px 12px; border-radius:999px;
+  }
+  .topbar .brand{font-weight:700; color:var(--ink);}
+
+  /* ---------- hero (step 0 only) ---------- */
+  .hero{
+    position:relative; margin:0 -16px 20px; height:300px; overflow:hidden;
+    display:none;
+  }
+  .hero.active{display:block;}
+  .hero img{width:100%; height:100%; object-fit:cover; display:block;}
+  .hero::after{
+    content:''; position:absolute; inset:0;
+    background:linear-gradient(180deg, rgba(8,14,24,.10) 0%, rgba(8,14,24,.35) 45%, rgba(8,14,24,.92) 100%);
+  }
+  .hero-text{position:absolute; right:20px; left:20px; bottom:18px; z-index:2; color:#f7f5f1;}
+  .hero-text h1{font-size:23px; font-weight:800; margin:0 0 6px; text-wrap:balance;}
+  .hero-text p{font-size:13.5px; margin:0; color:#d8d2c6;}
+  .hero-coach{
+    position:absolute; top:16px; right:16px; z-index:2; text-align:right;
+  }
+  .hero-coach .name{font-size:14px; font-weight:800; color:#fff;}
+  .hero-coach .title{font-size:11.5px; color:#d8d2c6;}
+
+  .progress{display:flex; gap:6px; margin:0 0 20px;}
+  .progress .dot{flex:1; height:4px; border-radius:2px; background:var(--border); transition:background .2s;}
+  .progress .dot.done{background:var(--brown);}
 
   .card{
     background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
-    padding:22px 18px; box-shadow:0 1px 3px rgba(0,0,0,.04);
+    padding:24px 20px;
   }
   .step{display:none;}
-  .step.active{display:block; animation:fade .25s ease;}
-  @keyframes fade{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+  .step.active{display:block; animation:fade .2s ease;}
+  @keyframes fade{from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);}}
 
-  .step h2{font-size:18px; margin:0 0 4px;}
+  .step h2{font-size:18px; margin:0 0 4px; font-weight:800;}
   .step .hint{color:var(--muted); font-size:13px; margin:0 0 18px;}
 
   .field{margin-bottom:16px;}
-  .field label{display:block; font-size:14px; font-weight:600; margin-bottom:6px;}
+  .field label{display:block; font-size:14px; font-weight:700; margin-bottom:6px;}
   .field input[type=text], .field input[type=tel], .field input[type=number]{
-    width:100%; padding:12px 14px; border:1.5px solid var(--border); border-radius:10px;
-    font-size:15px; font-family:inherit; background:#fff;
+    width:100%; padding:12px 14px; border:1.5px solid var(--border); border-radius:8px;
+    font-size:15px; font-family:inherit; background:#fff; color:var(--ink);
   }
-  .field input:focus{outline:none; border-color:var(--primary);}
+  .field input:focus{outline:none; border-color:var(--navy);}
   .field small.err{color:var(--danger); display:none; font-size:12px; margin-top:4px;}
   .field.invalid input{border-color:var(--danger);}
   .field.invalid small.err{display:block;}
@@ -69,23 +93,26 @@
   .choice-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
   .choice-grid.single-col{grid-template-columns:1fr;}
   .choice{
-    border:1.5px solid var(--border); border-radius:12px; padding:12px 14px; cursor:pointer;
+    border:1.5px solid var(--border); border-radius:8px; padding:12px 14px; cursor:pointer;
     font-size:14px; font-weight:600; text-align:center; user-select:none; background:#fff;
-    transition:all .15s;
+    transition:border-color .15s, background .15s;
   }
   .choice .sub{display:block; font-weight:400; color:var(--muted); font-size:12px; margin-top:3px;}
-  .choice:hover{border-color:var(--primary);}
-  .choice.selected{border-color:var(--primary); background:var(--primary-light); color:var(--primary-dark);}
+  .choice:hover{border-color:var(--navy);}
+  .choice.selected{border-color:var(--navy); background:rgba(11,22,38,.05); color:var(--navy);}
+  .choice.selected .sub{color:var(--navy); opacity:.75;}
+
+  .field-note{font-size:12px; color:var(--muted); margin:-8px 0 14px;}
 
   .nav-row{display:flex; gap:10px; margin-top:22px;}
   button{
-    font-family:inherit; font-size:15px; font-weight:700; border-radius:12px; border:none;
+    font-family:inherit; font-size:15px; font-weight:700; border-radius:8px; border:none;
     padding:14px 18px; cursor:pointer;
   }
-  .btn-primary{background:var(--primary); color:#fff; flex:1;}
-  .btn-primary:hover{background:var(--primary-dark);}
-  .btn-primary:disabled{background:#9ca3af; cursor:not-allowed;}
-  .btn-secondary{background:#fff; color:var(--text); border:1.5px solid var(--border); flex:0 0 auto;}
+  .btn-primary{background:var(--navy); color:#fff; flex:1;}
+  .btn-primary:hover{background:var(--navy-2);}
+  .btn-primary:disabled{background:#a9adb3; cursor:not-allowed;}
+  .btn-secondary{background:#fff; color:var(--ink); border:1.5px solid var(--border); flex:0 0 auto;}
   .btn-secondary:hover{border-color:var(--muted);}
 
   .consent{display:flex; align-items:flex-start; gap:8px; font-size:13px; color:var(--muted); margin-top:10px;}
@@ -93,47 +120,70 @@
 
   .hp-field{position:absolute; left:-9999px; opacity:0;}
 
-  /* results */
+  /* ---------- results ---------- */
   #results{display:none;}
   #results.active{display:block;}
   .result-header{text-align:center; margin-bottom:20px;}
-  .result-header h1{font-size:22px; margin:0 0 6px;}
+  .result-header h1{font-size:21px; margin:0 0 6px; font-weight:800;}
   .result-header p{color:var(--muted); font-size:14px; margin:0;}
 
   .section{margin-bottom:18px;}
-  .section h3{font-size:16px; margin:0 0 12px; display:flex; align-items:center; gap:8px;}
+  .section h3{font-size:15px; margin:0 0 12px; font-weight:800; display:flex; align-items:center; gap:8px;}
 
   .macro-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:14px;}
-  .macro-tile{background:var(--primary-light); border-radius:12px; padding:14px 8px; text-align:center;}
-  .macro-tile .val{font-size:18px; font-weight:800; color:var(--primary-dark);}
+  .macro-tile{background:var(--card); border:1px solid var(--border); border-radius:8px; padding:14px 8px; text-align:center;}
+  .macro-tile .val{font-size:19px; font-weight:800; color:var(--brown-dark);}
   .macro-tile .lbl{font-size:12px; color:var(--muted); margin-top:2px;}
   .kcal-banner{
-    background:linear-gradient(135deg, var(--primary), var(--primary-dark)); color:#fff;
-    border-radius:14px; padding:18px; text-align:center; margin-bottom:14px;
+    background:var(--navy); color:#fff;
+    border-radius:10px; padding:20px; text-align:center; margin-bottom:14px;
   }
-  .kcal-banner .num{font-size:32px; font-weight:800;}
-  .kcal-banner .lbl{font-size:13px; opacity:.9;}
+  .kcal-banner .num{font-size:32px; font-weight:800; color:var(--brown);}
+  .kcal-banner .lbl{font-size:13px; opacity:.85;}
 
-  .day-card{border:1px solid var(--border); border-radius:12px; padding:14px 16px; margin-bottom:10px;}
-  .day-card h4{margin:0 0 8px; font-size:15px; color:var(--primary-dark);}
+  .day-card{border:1px solid var(--border); border-radius:8px; padding:14px 16px; margin-bottom:10px; background:var(--card);}
+  .day-card h4{margin:0 0 8px; font-size:14.5px; font-weight:800; color:var(--navy);}
   .day-card ul{margin:0; padding-inline-start:18px;}
   .day-card li{font-size:14px; margin-bottom:6px;}
   .day-card li .meta{color:var(--muted); font-size:12.5px;}
 
-  .note{background:#fff7ed; border:1px solid #fed7aa; border-radius:12px; padding:12px 14px; font-size:13px; color:#9a3412; margin-bottom:14px;}
+  .focus-card{border:1.5px solid var(--brown); background:#fbf7f1; border-radius:8px; padding:14px 16px; margin-bottom:10px;}
+  .focus-card h4{margin:0 0 8px; font-size:14.5px; font-weight:800; color:var(--brown-dark);}
+  .focus-card ul{margin:0; padding-inline-start:18px;}
+  .focus-card li{font-size:14px; margin-bottom:6px;}
+  .focus-card li .meta{color:var(--muted); font-size:12.5px;}
+
+  .note{background:#fbf7f1; border:1px solid var(--border); border-radius:8px; padding:12px 14px; font-size:13px; color:#5c4a34; margin-bottom:14px;}
   .disclaimer{font-size:12px; color:var(--muted); border-top:1px dashed var(--border); padding-top:12px; margin-top:16px;}
 
   .submit-status{font-size:13px; text-align:center; margin-top:10px; color:var(--muted); min-height:18px;}
+
+  .brand-footer{
+    text-align:center; font-size:12px; color:var(--muted); letter-spacing:.02em;
+    margin-top:22px; padding-top:16px; border-top:1px solid var(--border);
+  }
+  .brand-footer strong{color:var(--ink); font-weight:700;}
 </style>
 </head>
 <body>
 <div class="app">
 
-  <header class="top">
+  <div class="topbar">
     <span class="badge">כלי חינמי</span>
-    <h1>מחשבון קלוריות + תוכנית אימונים אישית</h1>
-    <p>לגברים ולנשים · מותאם אישית לפי הפרמטרים שלך · לוקח פחות מדקה</p>
-  </header>
+    <span class="brand">מאיר עזרן · מאמן כושר אונליין</span>
+  </div>
+
+  <div class="hero active" id="heroBanner">
+    <span class="hero-coach">
+      <span class="name" style="display:block;">מאיר עזרן</span>
+      <span class="title">מאמן כושר אונליין</span>
+    </span>
+    <img src="assets/coach-hero.jpg" alt="מאיר עזרן - מאמן כושר אונליין" loading="eager">
+    <div class="hero-text">
+      <h1>מחשבון קלוריות + תוכנית אימונים אישית</h1>
+      <p>לגברים ולנשים · מותאם אישית לפי הפרמטרים והמטרות שלך · לוקח פחות מדקה</p>
+    </div>
+  </div>
 
   <div class="progress" id="progressBar"></div>
 
@@ -207,8 +257,26 @@
         </div>
       </section>
 
-      <!-- Step 3: training preferences -->
+      <!-- Step 3: focus areas -->
       <section class="step" data-step="3">
+        <h2>אזורים להתמקדות</h2>
+        <p class="hint">אפשר לבחור יותר מאחד - זה עוזר לבנות תוכנית ממוקדת באמת עבורך</p>
+
+        <div class="field">
+          <div class="choice-grid single-col" data-group="focusAreas" data-multi="true">
+            <div class="choice" data-value="belly">בטן ואזור הליבה</div>
+            <div class="choice" data-value="glutes_legs">ישבן ורגליים</div>
+            <div class="choice" data-value="arms">זרועות</div>
+            <div class="choice" data-value="back_posture">גב ויציבה</div>
+            <div class="choice" data-value="shoulders">כתפיים</div>
+            <div class="choice" data-value="chest">חזה</div>
+            <div class="choice" data-value="general">אין לי העדפה מיוחדת - גוף מלא מאוזן</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Step 4: training preferences -->
+      <section class="step" data-step="4">
         <h2>העדפות אימון</h2>
         <p class="hint">כדי לבנות לך תוכנית שימושית באמת</p>
 
@@ -242,8 +310,8 @@
         </div>
       </section>
 
-      <!-- Step 4: contact -->
-      <section class="step" data-step="4">
+      <!-- Step 5: contact -->
+      <section class="step" data-step="5">
         <h2>איפה לשלוח את התוכנית?</h2>
         <p class="hint">התוכנית האישית שלך תוצג כאן מיד, ונשמח גם לשלוח אותה אליך לוואטסאפ</p>
 
@@ -260,7 +328,7 @@
 
         <label class="consent">
           <input type="checkbox" id="consentCheck">
-          <span>אני מאשר/ת קבלת הודעה עם התוכנית ומידע נוסף בנושא כושר ותזונה לוואטסאפ. ניתן להסיר בקשה בכל שלב.</span>
+          <span>אני מאשר/ת קבלת הודעה עם התוכנית ומידע נוסף בנושא כושר ותזונה לוואטסאפ ממאיר. ניתן להסיר בקשה בכל שלב.</span>
         </label>
       </section>
 
@@ -276,7 +344,7 @@
   <div id="results">
     <div class="result-header">
       <h1 id="resultsTitle">התוכנית האישית שלך 💪</h1>
-      <p>מבוססת על הנתונים שהזנת - קלוריות, מאקרו ותוכנית אימונים שבועית</p>
+      <p>מבוססת על הנתונים שהזנת - קלוריות, מאקרו, תוכנית אימונים שבועית ותוספת ממוקדת לאזורים שבחרת</p>
     </div>
 
     <div class="section">
@@ -297,6 +365,11 @@
       <div id="workoutDays"></div>
     </div>
 
+    <div class="section" id="focusSection" style="display:none;">
+      <h3>🎯 תוספת ממוקדת לאזורים שבחרת</h3>
+      <div id="focusDays"></div>
+    </div>
+
     <div class="section">
       <div class="disclaimer">
         הכלי מספק המלצה כללית למטרות אינפורמטיביות בלבד, ואינו תחליף לייעוץ רפואי, תזונתי או אימוני מקצועי.
@@ -307,6 +380,10 @@
     <div class="nav-row">
       <button type="button" class="btn-secondary" id="restartBtn">התחלה מחדש</button>
     </div>
+  </div>
+
+  <div class="brand-footer">
+    <strong>מאיר עזרן</strong> · מאמן כושר אונליין
   </div>
 
 </div>
@@ -325,22 +402,23 @@
     // אותו ערך בדיוק כמו ב-Script Property בשם LEAD_FORM_SECRET (ראה README.md).
     // אפשר להשאיר ריק אם לא הוגדר סוד בצד השרת.
     SHARED_SECRET: '',
-    COACH_NAME: 'מאיר',
+    COACH_NAME: 'מאיר עזרן',
   };
 
   // ============================================================
   // State
   // ============================================================
-  var STEPS = ['0', '1', '2', '3', '4'];
+  var STEPS = ['0', '1', '2', '3', '4', '5'];
   var stepIndex = 0;
   var answers = {
     gender: null, goal: null, age: null, height: null, weight: null,
-    activity: null, experience: null, days: null, equipment: null,
+    activity: null, focusAreas: [], experience: null, days: null, equipment: null,
     name: '', phone: ''
   };
 
   var form = document.getElementById('wizardForm');
   var progressBar = document.getElementById('progressBar');
+  var heroBanner = document.getElementById('heroBanner');
   var nextBtn = document.getElementById('nextBtn');
   var backBtn = document.getElementById('backBtn');
   var submitStatus = document.getElementById('submitStatus');
@@ -361,19 +439,31 @@
     document.querySelectorAll('.step').forEach(function (s) {
       s.classList.toggle('active', s.getAttribute('data-step') === STEPS[i]);
     });
+    heroBanner.classList.toggle('active', i === 0);
     backBtn.style.visibility = i === 0 ? 'hidden' : 'visible';
     nextBtn.textContent = i === STEPS.length - 1 ? 'קבל/י את התוכנית שלי' : 'המשך';
     updateProgress();
   }
 
-  // choice buttons (single-select groups)
+  // choice buttons (single-select groups, or multi-select when data-multi="true")
   document.querySelectorAll('[data-group]').forEach(function (group) {
+    var isMulti = group.getAttribute('data-multi') === 'true';
+    var key = group.getAttribute('data-group');
+
     group.addEventListener('click', function (e) {
       var choice = e.target.closest('.choice');
       if (!choice) return;
-      group.querySelectorAll('.choice').forEach(function (c) { c.classList.remove('selected'); });
-      choice.classList.add('selected');
-      answers[group.getAttribute('data-group')] = choice.getAttribute('data-value');
+
+      if (isMulti) {
+        choice.classList.toggle('selected');
+        var selected = Array.prototype.slice.call(group.querySelectorAll('.choice.selected'))
+          .map(function (c) { return c.getAttribute('data-value'); });
+        answers[key] = selected;
+      } else {
+        group.querySelectorAll('.choice').forEach(function (c) { c.classList.remove('selected'); });
+        choice.classList.add('selected');
+        answers[key] = choice.getAttribute('data-value');
+      }
       clearFieldError(group.closest('.field'));
     });
   });
@@ -400,9 +490,12 @@
       if (!answers.activity) { ok = false; }
     }
     if (STEPS[i] === '3') {
-      if (!answers.experience || !answers.days || !answers.equipment) { ok = false; }
+      if (!answers.focusAreas || answers.focusAreas.length === 0) { ok = false; }
     }
     if (STEPS[i] === '4') {
+      if (!answers.experience || !answers.days || !answers.equipment) { ok = false; }
+    }
+    if (STEPS[i] === '5') {
       var name = fieldEl('name').querySelector('input').value.trim();
       var phoneRaw = fieldEl('phone').querySelector('input').value.trim();
       var digits = phoneRaw.replace(/\D/g, '');
@@ -565,9 +658,63 @@
   }
 
   // ============================================================
+  // תוספת ממוקדת לאזורי השיפור שנבחרו
+  // ============================================================
+  var FOCUS_LABELS = {
+    belly: 'בטן וליבה', glutes_legs: 'ישבן ורגליים', arms: 'זרועות',
+    back_posture: 'גב ויציבה', shoulders: 'כתפיים', chest: 'חזה', general: 'גוף מלא מאוזן'
+  };
+
+  // אזור נבחר -> קטגוריות תרגילים רלוונטיות (יכול להיות יותר מאחת)
+  var FOCUS_TO_CATS = {
+    belly: ['core'],
+    glutes_legs: ['hamglute', 'lunge'],
+    arms: ['arms'],
+    back_posture: ['back'],
+    shoulders: ['shoulders'],
+    chest: ['chest'],
+    general: ['core']
+  };
+
+  function buildFocusAddOn(equipment, focusAreas) {
+    var areas = focusAreas.filter(function (a) { return a !== 'general'; });
+    if (areas.length === 0) areas = ['general'];
+    areas = areas.slice(0, 4); // לא מציפים - עד 4 אזורים
+
+    return areas.map(function (area) {
+      var cats = FOCUS_TO_CATS[area] || ['core'];
+      var exercises = cats.map(function (cat, idx) {
+        return { cat: cat, name: pick(equipment, cat, idx) };
+      }).filter(function (ex) { return ex.name; });
+
+      return { label: FOCUS_LABELS[area] || area, exercises: exercises };
+    }).filter(function (day) { return day.exercises.length > 0; });
+  }
+
+  // ============================================================
   // רינדור תוצאות
   // ============================================================
-  function renderResults(a, nutrition, weekPlan) {
+  function renderExerciseList(container, days, goal, experience, reps) {
+    container.innerHTML = '';
+    days.forEach(function (day) {
+      var card = document.createElement('div');
+      card.className = container.id === 'focusDays' ? 'focus-card' : 'day-card';
+      var h4 = document.createElement('h4');
+      h4.textContent = day.label;
+      card.appendChild(h4);
+      var ul = document.createElement('ul');
+      day.exercises.forEach(function (ex) {
+        var sr = reps || getSetsReps(goal, experience, ex.cat);
+        var li = document.createElement('li');
+        li.innerHTML = ex.name + ' <span class="meta">- ' + sr.sets + ' סטים × ' + sr.reps + ' חזרות, מנוחה ' + sr.rest + '</span>';
+        ul.appendChild(li);
+      });
+      card.appendChild(ul);
+      container.appendChild(card);
+    });
+  }
+
+  function renderResults(a, nutrition, weekPlan, focusAddOn) {
     document.getElementById('resultsTitle').textContent = 'התוכנית האישית של ' + a.name.split(' ')[0] + ' 💪';
     document.getElementById('kcalValue').textContent = nutrition.calories.toLocaleString('he-IL');
     document.getElementById('proteinValue').textContent = nutrition.proteinG;
@@ -582,27 +729,19 @@
       cardioNote.style.display = 'none';
     }
 
-    var wrap = document.getElementById('workoutDays');
-    wrap.innerHTML = '';
-    weekPlan.forEach(function (day) {
-      var card = document.createElement('div');
-      card.className = 'day-card';
-      var h4 = document.createElement('h4');
-      h4.textContent = day.label;
-      card.appendChild(h4);
-      var ul = document.createElement('ul');
-      day.exercises.forEach(function (ex) {
-        var sr = getSetsReps(a.goal, a.experience, ex.cat);
-        var li = document.createElement('li');
-        li.innerHTML = ex.name + ' <span class="meta">- ' + sr.sets + ' סטים × ' + sr.reps + ' חזרות, מנוחה ' + sr.rest + '</span>';
-        ul.appendChild(li);
-      });
-      card.appendChild(ul);
-      wrap.appendChild(card);
-    });
+    renderExerciseList(document.getElementById('workoutDays'), weekPlan, a.goal, a.experience, null);
+
+    var focusSection = document.getElementById('focusSection');
+    if (focusAddOn && focusAddOn.length > 0) {
+      focusSection.style.display = 'block';
+      renderExerciseList(document.getElementById('focusDays'), focusAddOn, a.goal, a.experience, { sets: 3, reps: '15-20', rest: '30-45 שנ׳' });
+    } else {
+      focusSection.style.display = 'none';
+    }
 
     form.closest('.card').style.display = 'none';
     progressBar.style.display = 'none';
+    heroBanner.classList.remove('active');
     document.getElementById('results').classList.add('active');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -615,11 +754,13 @@
     var goalLabel = { fatloss: 'ירידה במשקל', gain: 'עלייה במסת שריר', maintain: 'שימור' }[a.goal];
     var equipmentLabel = { gym: 'חדר כושר', home: 'בית עם משקולות', bodyweight: 'בית בלי ציוד' }[a.equipment];
     var experienceLabel = { beginner: 'מתחיל/ה', intermediate: 'בינוני/ת', advanced: 'מתקדם/ת' }[a.experience];
+    var focusLabel = (a.focusAreas || []).map(function (v) { return FOCUS_LABELS[v] || v; }).join(', ') || 'לא צוין';
 
     return [
       'ליד מהכלי החינמי (מחשבון קלוריות + תוכנית אימונים)',
       genderLabel + ', גיל ' + a.age + ', ' + a.height + ' ס"מ, ' + a.weight + ' ק"ג',
       'מטרה: ' + goalLabel,
+      'אזורי התמקדות: ' + focusLabel,
       'רמת ניסיון: ' + experienceLabel + ', ' + a.days + ' ימי אימון בשבוע, מיקום: ' + equipmentLabel,
       'קלוריות מומלצות: ' + nutrition.calories + ' (חלבון ' + nutrition.proteinG + 'ג\', פחמימה ' + nutrition.carbsG + 'ג\', שומן ' + nutrition.fatG + 'ג\')'
     ].join('\n');
@@ -659,9 +800,10 @@
 
     var nutrition = calcNutrition(answers);
     var weekPlan = buildWeekPlan(answers.equipment, answers.experience, answers.days);
+    var focusAddOn = buildFocusAddOn(answers.equipment, answers.focusAreas);
 
     submitLead(answers, nutrition);
-    renderResults(answers, nutrition, weekPlan);
+    renderResults(answers, nutrition, weekPlan, focusAddOn);
   }
 
   showStep(0);
